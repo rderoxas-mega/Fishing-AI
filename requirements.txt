@@ -1,8 +1,6 @@
 streamlit
-opencv-python-headless
+pandas
 numpy
-pillow
-# Add any other specific AI libraries you actually imported, like:
-# tensorflow
-# torch
-# ultralytics
+joblib
+matplotlib
+scikit-learn
