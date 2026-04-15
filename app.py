@@ -65,23 +65,30 @@ if uploaded_file:
     # Fill any remaining missing values (numeric only)
     df = df.fillna(df.median(numeric_only=True))
 
-    # ==========================================
+    # ========================================== 
     # 6. Prediction
-    # ==========================================
+    # ========================================== 
     if st.button("🔮 Predict QTYTUBS"):
-        X = df.select_dtypes(include=[np.number])
-        X = X.drop(columns=['QTYTUBS'], errors='ignore')
+        # Get the exact list of features the model was trained on
+        try:
+            expected_features = selector.feature_names_in_
+            
+            # Filter the uploaded dataframe to only include those features
+            X = df[expected_features]
+            
+            # Now the transform and scaling will work
+            X_selected = selector.transform(X)
+            X_scaled = scaler.transform(X_selected)
 
-        # Feature selection + scaling
-        X_selected = selector.transform(X)
-        X_scaled = scaler.transform(X_selected)
+            predictions = model.predict(X_scaled)
+            df['Predicted_QTYTUBS'] = predictions
 
-        predictions = model.predict(X_scaled)
-
-        df['Predicted_QTYTUBS'] = predictions
-
-        st.subheader("📈 Predictions")
-        st.write(df[['Predicted_QTYTUBS']].head())
+            st.subheader("📈 Predictions")
+            st.write(df[['Predicted_QTYTUBS']].head())
+            
+        except KeyError as e:
+            st.error(f"❌ Missing required column: {e}")
+            st.info(f"Your CSV must include these columns: {list(selector.feature_names_in_)}")
 
         # ==========================================
         # 7. Visualization: Actual vs Predicted
